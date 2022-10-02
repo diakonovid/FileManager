@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 [assembly: InternalsVisibleTo("FileManager.Tests")]
 namespace FileManager;
 
+/// <summary>
+/// Implementation of external file sorting
+/// </summary>
 public class ExternalFileSorter : IFileSorter
 {
     private readonly SortingOptions _options;
@@ -20,6 +23,16 @@ public class ExternalFileSorter : IFileSorter
         _logger = _options.Logger;
     }
     
+    /// <summary>
+    /// Sorts the lines of a file. The sort compares the lines to each
+    /// other using the IComparable interface, which can be overridden
+    /// by changing SortingOptions's property.
+    /// </summary>
+    /// <param name="fileName">Absolute or relative path for the specified file</param>
+    /// <param name="cancellationToken">Sort cancellation token</param>
+    /// <exception cref="ArgumentException">File validation</exception>
+    /// <exception cref="OperationCanceledException">Requested cancellation</exception>
+    /// <returns>Absolute path for the sorted file</returns>
     public string Sort(string fileName, CancellationToken cancellationToken)
     {
         try
@@ -37,6 +50,11 @@ public class ExternalFileSorter : IFileSorter
     internal List<string> Split(string fileName, CancellationToken cancellationToken)
     {
         _logger?.LogInformation("Split started");
+        
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("Empty file name");
+        }
         
         var list = new List<string>();
         var lines = new string[_options.MaxLinesNumberPerFile];
@@ -75,7 +93,7 @@ public class ExternalFileSorter : IFileSorter
 
         if (files.Count == 0)
         {
-            throw new AggregateException("Empty files list");
+            throw new ArgumentException("Empty files list");
         }
         
         var fileName = Path.Combine(_options.OutputDirectory, $"result_{Guid.NewGuid():D}.txt");
