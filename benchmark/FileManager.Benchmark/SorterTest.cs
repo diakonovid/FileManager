@@ -18,7 +18,7 @@ public class SorterTest
     }
 
     [Benchmark]
-    public string SuperQuickSorter()
+    public string ExternalSorter()
     {
         var options = new SortingOptions();
         return new ExternalFileSorter(options).Sort(_filename, CancellationToken.None);
