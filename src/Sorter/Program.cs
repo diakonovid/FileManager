@@ -1,4 +1,5 @@
-﻿using FileManager;
+﻿using System.Diagnostics;
+using FileManager;
 using FileManager.Interfaces;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -31,15 +32,19 @@ Console.CancelKeyPress += (s, e) =>
 
 try
 {
+    var stopWatch = new Stopwatch();
+    stopWatch.Start();
     var options = new SortingOptions
     {
         Logger = loggerFactory.CreateLogger<IFileSorter>(),
-        OutputDirectory= args[1]
+        OutputDirectory= args[1],
+        MaxLinesNumberPerFile = 4000000
     };
     
     IFileSorter sorter = new ExternalFileSorter(options);
     sorter.Sort(args[0], cts.Token);
-    logger.LogInformation("Sorting completed");
+    stopWatch.Stop();
+    logger.LogInformation("Sorting completed in {0} ms", stopWatch.ElapsedMilliseconds);
 }
 catch (OperationCanceledException e)
 {

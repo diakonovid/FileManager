@@ -48,4 +48,24 @@ public class SorterTests
             Assert.Equal(expectedLines[i], resultLines[i]);
         }
     }
+    
+    [Fact]
+    public void SortFile_Successful()
+    {
+        const string filename = "Data/test.txt";
+
+        var files = _sorter.Split(filename, CancellationToken.None);
+        
+        var resultFileName = _sorter.Merge(files, CancellationToken.None);
+
+        var resultLines = File.ReadAllLines(resultFileName);
+        var expectedLines = File.ReadAllLines("Data/correct.txt");
+        
+        Assert.Equal(expectedLines.Length, resultLines.Length);
+
+        for (var i = 0; i < expectedLines.Length; i++)
+        {
+            Assert.Equal(expectedLines[i], resultLines[i]);
+        }
+    }
 }

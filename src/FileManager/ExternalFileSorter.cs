@@ -57,30 +57,31 @@ public class ExternalFileSorter : IFileSorter
         }
         
         var list = new List<string>();
+        
         var lines = new string[_options.MaxLinesNumberPerFile];
         
         using var reader = new StreamReader(fileName);
 
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         var extension = Path.GetExtension(fileName);
-        
+
         var linePointer = 0;
         while (!reader.EndOfStream)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            
             lines[linePointer] = reader.ReadLine();
             linePointer++;
             if (linePointer == _options.MaxLinesNumberPerFile || reader.EndOfStream)
             {
+                var sortedLines = lines.AsParallel().OrderBy(x=>x, _options.Comparer);
+                
                 var partFileName = $"{nameWithoutExtension}_{list.Count + 1}{extension}";
                 var partFilepath = Path.Combine(_options.OutputDirectory, partFileName);
+                WriteAllLines(partFilepath, sortedLines, linePointer);
                 
                 list.Add(partFilepath);
-                Array.Sort(lines,0, linePointer, _options.Comparer);
-                WriteAllLines(partFilepath, lines);
-                
                 linePointer = 0;
-                _logger?.LogInformation("Temporary file {Name} created", partFileName);
             }
         }
 
@@ -143,12 +144,18 @@ public class ExternalFileSorter : IFileSorter
         return fileName;
     }
 
-    private void WriteAllLines(string fileName, IEnumerable<string> lines)
+    private void WriteAllLines(string fileName, IEnumerable<string> lines, int pointer)
     {
         using var writer = new StreamWriter(fileName);
         foreach (var line in lines)
         {
+            if (pointer <= 0)
+            {
+                break;
+            }
             writer.WriteLine(line);
+            pointer--;
         }
+        _logger?.LogInformation("Temporary file {Name} created", fileName);
     }
 }

@@ -2,7 +2,7 @@ namespace FileManager;
 
 public class LineComparer : IComparer<string?>
 {
-    private const StringComparison ComparisonType = StringComparison.InvariantCulture;
+    private const StringComparison ComparisonType = StringComparison.Ordinal;
     private const char Separator = '.';
 
     public int Compare(string? lineA, string? lineB)

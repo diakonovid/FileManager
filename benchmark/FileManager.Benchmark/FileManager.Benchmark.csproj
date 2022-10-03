@@ -17,7 +17,7 @@
 
     <ItemGroup>
       <None Update="Data\100MB.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 
